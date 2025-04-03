@@ -66,3 +66,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem 'devise'         # ユーザー認証
+gem 'active_hash'    # Slack連携用の軽量モデル
+gem 'dotenv-rails'   # 環境変数管理
