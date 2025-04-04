@@ -5,6 +5,8 @@ class SlackService
     
     message = {
       text: "#{user.name}さんが新しい投稿を作成しました",
+      username: user.name,
+      icon_emoji: ":robot_face:",
       blocks: [
         {
           type: "header",
