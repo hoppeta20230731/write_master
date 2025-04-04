@@ -1,0 +1,48 @@
+<div class="container mt-4">
+  <% if user_signed_in? %>
+    <h1>あなたの投稿一覧</h1>
+    
+    <div class="mb-3">
+      <%= link_to "新規投稿", new_post_path, class: "btn btn-primary" %>
+    </div>
+    
+    <% if @posts.present? %>
+      <div class="row">
+        <% @posts.each do |post| %>
+          <div class="col-md-4 mb-4">
+            <div class="card <%= post.draft? ? 'bg-light' : '' %>">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <%= post.title %>
+                  <% if post.draft? %>
+                    <span class="badge bg-warning">下書き</span>
+                  <% end %>
+                </h5>
+                <p class="card-text"><%= post.content.truncate(100) %></p>
+                <p class="text-muted"><%= post.word_count %>文字</p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="alert alert-info">
+        投稿がありません。「新規投稿」から初めての投稿を作成しましょう！
+      </div>
+    <% end %>
+  <% else %>
+    <div class="jumbotron">
+      <h1 class="display-4">WriteMasterへようこそ</h1>
+      <p class="lead">ビジネスライティングスキルを効率的に向上させるための専用アプリです。</p>
+      <hr class="my-4">
+      <p>
+        30分のタイマーで集中して書く、字数のリアルタイムカウント、過去の投稿の簡単な振り返りなど、
+        あなたのライティングをサポートする機能が揃っています。
+      </p>
+      <p class="lead">
+        <%= link_to "ログイン", new_user_session_path, class: "btn btn-primary btn-lg" %>
+        <%= link_to "新規登録", new_user_registration_path, class: "btn btn-success btn-lg" %>
+      </p>
+    </div>
+  <% end %>
+</div>
