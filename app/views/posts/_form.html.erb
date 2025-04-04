@@ -10,6 +10,11 @@
     </div>
   <% end %>
 
+  <div class="timer-container mb-3">
+    <label>残り時間: <span id="timer">30:00</span></label>
+    <button type="button" id="start-timer" class="btn btn-sm btn-outline-primary">タイマー開始</button>
+  </div>
+
   <div class="form-group mb-3">
     <%= form.label :title, 'タイトル' %>
     <%= form.text_field :title, class: 'form-control' %>
@@ -30,27 +35,3 @@
     <%= form.submit '保存する', class: 'btn btn-primary' %>
   </div>
 <% end %>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const contentTextarea = document.getElementById('post-content');
-    const wordCountSpan = document.getElementById('word-count');
-    
-    function updateWordCount() {
-      // 空白を除去して文字数をカウント
-      const text = contentTextarea.value.replace(/\s+/g, '');
-      const count = text.length;
-      wordCountSpan.textContent = count;
-      
-      // 文字数によってスタイルを変更
-      if (count >= 400 && count <= 700) {
-        wordCountSpan.style.color = 'green';
-      } else {
-        wordCountSpan.style.color = 'red';
-      }
-    }
-    
-    contentTextarea.addEventListener('input', updateWordCount);
-    updateWordCount(); // 初期表示時にも実行
-  });
-</script>
