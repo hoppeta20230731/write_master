@@ -36,3 +36,6 @@
 
 # 環境変数格納（Webhook url）
 .env
+
+# メモ
+memo.md
