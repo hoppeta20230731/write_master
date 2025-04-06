@@ -5,6 +5,7 @@
       <div>
         <% if @post.draft? %>
           <span class="badge bg-warning">下書き</span>
+          <%= link_to '編集', edit_post_path(@post), class: 'btn btn-sm btn-outline-primary' %>
         <% elsif @post.posted_at.present? %>
           <span class="badge bg-success">Slack投稿済み</span>
         <% end %>
