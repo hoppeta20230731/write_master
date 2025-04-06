@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
-  before_action :set_post, only: [:show]
+  before_action :set_post, only: [:show, :edit, :update]
   
   def index
     if user_signed_in?
@@ -35,6 +35,34 @@ class PostsController < ApplicationController
 
   end
   
+  def edit
+    unless @post.draft?
+      redirect_to @post, alert: '投稿済みの内容は編集できません'
+    end
+  end
+  
+  def update
+    unless @post.draft?
+      redirect_to @post, alert: '投稿済みの内容は編集できません'
+      return
+    end
+    
+    if @post.update(post_params)
+      @post.update(word_count: count_words(@post.content)) if @post.content.present?
+      
+      # 下書きから公開に変更された場合はSlackに投稿
+      if !@post.draft? && !@post.posted_at.present?
+        if SlackService.post_message(@post, current_user)
+          @post.update(posted_at: Time.current)
+        end
+      end
+      
+      redirect_to @post, notice: '投稿が更新されました'
+    else
+      render :edit
+    end
+  end
+
   private
 
   def set_post
