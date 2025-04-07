@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
-  before_action :set_post, only: [:show, :edit, :update]
+  before_action :set_post, only: [:show, :edit, :update, :destroy]
   
   def index
     if user_signed_in?
@@ -36,13 +36,13 @@ class PostsController < ApplicationController
   end
   
   def edit
-    unless @post.draft?
+    if @post.posted_at.present?
       redirect_to @post, alert: '投稿済みの内容は編集できません'
     end
   end
   
   def update
-    unless @post.draft?
+    if @post.posted_at.present?
       redirect_to @post, alert: '投稿済みの内容は編集できません'
       return
     end
@@ -61,6 +61,17 @@ class PostsController < ApplicationController
     else
       render :edit
     end
+  end
+
+  def destroy
+    # 投稿済みは削除できない
+    if @post.posted_at.present?
+      redirect_to @post, alert: 'Slackに投稿済みのため削除できません'
+      return
+    end
+
+    @post.destroy
+    redirect_to posts_path, notice: '投稿が削除されました'
   end
 
   private
