@@ -47,6 +47,9 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+  gem 'rspec-rails', '~> 4.0.0'
+  gem 'factory_bot_rails'
+  gem 'faker'
 end
 
 group :development do
@@ -71,6 +74,7 @@ gem 'devise'         # ユーザー認証
 gem 'active_hash'    # Slack連携用の軽量モデル
 gem 'dotenv-rails'   # 環境変数管理
 gem 'httparty'  # HTTP通信用
+gem 'pry-rails'
 
 group :production do
   gem 'pg'
