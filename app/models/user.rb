@@ -6,4 +6,7 @@ class User < ApplicationRecord
   
   # 関連付け - ユーザーは複数の投稿を持つ
   has_many :posts, dependent: :destroy
+
+  # バリデーション
+  validates :name, presence: true
 end
