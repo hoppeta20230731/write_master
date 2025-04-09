@@ -10,17 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_04_03_085251) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_09_065708) do
   create_table "posts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title"
     t.text "content"
     t.integer "word_count"
     t.boolean "draft_flag"
     t.datetime "posted_at"
-    t.integer "slack_channel_id"
+    t.string "slack_channel_id"
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "slack_message_ts"
+    t.text "slack_replies_data"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -33,6 +35,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_03_085251) do
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "slack_access_token"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
