@@ -10,6 +10,7 @@ class User < ApplicationRecord
   # バリデーション
   validates :name, presence: true
 
-  # Slack暗号化キー
-  attr_encrypted :slack_access_token, key: Rails.application.credentials.dig(:slack, :encryption_key)
+  # アクセストークン暗号化
+  encrypts :slack_access_token
+
 end

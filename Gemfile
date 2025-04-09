@@ -83,5 +83,4 @@ end
 # === Slack連携・OAuthで追加 ===
 gem 'omniauth-slack'
 gem 'slack-ruby-client'
-gem 'attr_encrypted', '~> 3.1.0'
 # ============================
