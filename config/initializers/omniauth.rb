@@ -1,10 +1,30 @@
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :slack,
-           # ↓ CredentialsからClient IDを取得
+  provider :oauth2,
+           # Client ID (Credentialsから取得)
            Rails.application.credentials.dig(:slack, :client_id),
-           # ↓ CredentialsからClient Secretを取得
+           # Client Secret (Credentialsから取得)
            Rails.application.credentials.dig(:slack, :client_secret),
-           # ↓ アプリが要求する権限（スコープ）を指定
-           scope: 'chat:write,channels:history'
-           # user_scope: '' # User Tokenが必要な場合は指定 (今回は空)
+           # ↓↓↓ ここからオプション設定 (大きなハッシュ) ↓↓↓
+           {
+             # プロバイダー名を :slack と定義 (URLパスやコールバック処理で使うため)
+             name: 'slack',
+             # 要求する Bot Token Scope
+             scope: 'chat:write,channels:history',
+             # 要求する User Token Scope (今回は空)
+             user_scope: '',
+             # 認可リクエストに追加するパラメータ
+             authorize_params: {
+               # Bot Token Flow であることを示すために user_scope を空で指定
+               user_scope: ''
+             },
+             # Slack APIのエンドポイントや設定
+             client_options: {
+               # 基本となるサイトURL
+               site: 'https://slack.com',
+               # 【重要】OAuth V2 の認可エンドポイントURL
+               authorize_url: 'https://slack.com/oauth/v2/authorize',
+               # 【重要】OAuth V2 のトークンエンドポイントURL
+               token_url: 'https://slack.com/api/oauth.v2.access'
+             }
+           } # ← オプション設定ハッシュここまで
 end
