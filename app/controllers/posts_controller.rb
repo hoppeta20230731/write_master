@@ -20,14 +20,11 @@ class PostsController < ApplicationController
     
     if @post.save
       unless @post.draft?
-        if SlackService.post_message(@post, current_user)
-          @post.update(posted_at: Time.current)
-        end
+        SlackService.post_message(@post, current_user)
       end
-
       redirect_to posts_path, notice: '投稿が作成されました'
     else
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -51,15 +48,12 @@ class PostsController < ApplicationController
       @post.update(word_count: count_words(@post.content)) if @post.content.present?
       
       # 下書きから公開に変更された場合はSlackに投稿
-      if !@post.draft? && !@post.posted_at.present?
-        if SlackService.post_message(@post, current_user)
-          @post.update(posted_at: Time.current)
-        end
-      end
-      
+      if !@post.draft? && @post.posted_at.blank?
+        SlackService.post_message(@post, current_user)
+      end 
       redirect_to @post, notice: '投稿が更新されました'
     else
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
