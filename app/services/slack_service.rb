@@ -65,6 +65,78 @@ class SlackService
     end
   end
 
+  # 特定の投稿に対するSlackスレッドの返信を取得するクラスメソッド
+  def self.fetch_replies(post, user)
+    # 必要な情報が揃っているかチェック
+    unless post.slack_channel_id.present? && post.slack_message_ts.present? && user&.slack_access_token.present?
+      Rails.logger.info "Slack返信取得スキップ: Slack情報不足または未連携。 Post ID: #{post.id}"
+      return [] # 情報不足なら空の配列を返す
+    end
+
+    replies = [] # 返信結果を格納する配列
+    user_info_cache = {} # Slackユーザー情報を一時的にキャッシュするハッシュ
+
+    begin
+      token = user.slack_access_token
+      client = Slack::Web::Client.new(token: token)
+
+      # スレッド返信を取得
+      response = client.conversations_replies(
+        channel: post.slack_channel_id,
+        ts: post.slack_message_ts
+      )
+
+      if response.ok?
+        raw_replies = response.messages.drop(1) # 親メッセージを除外
+
+        # 返信からユニークなユーザーIDを抽出
+        user_ids = raw_replies.map { |msg| msg.user }.uniq.compact
+
+        # ユニークなIDごとにユーザー情報を取得 (API呼び出しは最小限に)
+        user_ids.each do |user_id|
+          unless user_info_cache[user_id]
+            begin
+              user_info_response = client.users_info(user: user_id) # users:read スコープが必要
+              if user_info_response.ok?
+                user_profile = user_info_response.user.profile
+                user_info_cache[user_id] = user_profile.real_name_normalized.presence || user_profile.display_name_normalized.presence || user_info_response.user.name
+              else
+                Rails.logger.warn "Slackユーザー情報取得APIエラー: #{user_info_response.error}. User ID: #{user_id}"
+                user_info_cache[user_id] = "Unknown User(#{user_id})"
+              end
+            rescue Slack::Web::Api::Errors::SlackError => e
+              Rails.logger.error "Slack users_info API例外: #{e.message}. User ID: #{user_id}"
+              user_info_cache[user_id] = "Unknown User(#{user_id})"
+            end
+          end
+        end
+
+        # 返信データを整形 (キャッシュしたユーザー名を使用)
+        replies = raw_replies.map do |msg|
+          {
+            user_id: msg.user,
+            user_name: user_info_cache[msg.user] || "Unknown User(#{msg.user})",
+            text: msg.text,
+            ts: msg.ts,
+            time: Time.at(msg.ts.to_f).strftime("%Y-%m-%d %H:%M")
+          }
+        end
+        Rails.logger.info "Slack返信取得成功: Post ID: #{post.id}, Replies fetched: #{replies.count}"
+      else
+        Rails.logger.error "Slack conversations.replies APIエラー: #{response.error}. Post ID: #{post.id}"
+      end
+
+    rescue Slack::Web::Api::Errors::SlackError => e
+      Rails.logger.error "Slack API例外 (返信取得): #{e.message}. Post ID: #{post.id}"
+    rescue => e
+      Rails.logger.error "予期せぬSlack返信取得エラー: #{e.message}. Post ID: #{post.id}"
+      Rails.logger.error e.backtrace.join("\n")
+    end
+
+    replies # 整形済みの返信配列を返す
+  end
+
+
   private # private メソッドに変更
 
   # メッセージブロックを構築するメソッド

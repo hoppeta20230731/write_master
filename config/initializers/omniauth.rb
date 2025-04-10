@@ -8,7 +8,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
              # プロバイダー名を :slack と定義 (URLパスやコールバック処理で使うため)
              name: 'slack',
              # 要求する Bot Token Scope
-             scope: 'chat:write,channels:history',
+             scope: 'chat:write,channels:history,users:read',
              # 要求する User Token Scope (今回は空)
              user_scope: '',
              # 認可リクエストに追加するパラメータ

@@ -29,7 +29,7 @@ class PostsController < ApplicationController
   end
 
   def show
-
+    @slack_replies = SlackService.fetch_replies(@post, current_user)
   end
   
   def edit
