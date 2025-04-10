@@ -1,6 +1,16 @@
 <div class="container mt-4">
   <% if user_signed_in? %>
     <h1>あなたの投稿一覧</h1>
+
+    <div class="alert alert-info my-3">
+      <% if current_user.slack_access_token.blank? %>
+        <p class="mb-1">Slackと連携すると、投稿が完了した際に通知が送信されます。</p>
+        <%= button_to "Slackと連携する", slack_login_path, method: :post, class: "btn btn-warning btn-sm", data: { turbo: false } %>
+      <% else %>
+        <p class="mb-0" style="color: green;">✓ Slack連携済みです。</p>
+        <%# TODO: 将来的に連携解除ボタンなどをここに追加できます %>
+      <% end %>
+    </div>
     
     <div class="mb-3">
       <%= link_to "新規投稿", new_post_path, class: "btn btn-primary" %>
