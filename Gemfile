@@ -81,7 +81,7 @@ group :production do
 end
 
 # === Slack連携・OAuthで追加 ===
-gem 'omniauth-slack'
+gem 'omniauth'  
+gem 'omniauth-oauth2'
 gem 'slack-ruby-client'
-gem 'attr_encrypted', '~> 3.1.0'
 # ============================

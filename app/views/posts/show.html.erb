@@ -32,6 +32,30 @@
     </div>
   </div>
   
+    <div class="slack-replies mt-4">
+    <hr>
+    <h2><i class="fab fa-slack"></i> Slackでのフィードバック</h2>
+
+    <%# @slack_replies にデータがある (空ではない) 場合のみ表示 %>
+    <% if @slack_replies.present? %>
+      <ul class="list-group list-group-flush">
+        <% @slack_replies.each do |reply| %>
+          <li class="list-group-item px-0">
+            <div class="d-flex w-100 justify-content-between">
+              <strong class="text-muted"><%= reply[:user_name] %></strong>
+              <small class="text-muted"><%= reply[:time] %></small>
+            </div>
+            <p class="mb-1"><%= simple_format(h(reply[:text])) %></p>
+          </li>
+        <% end %>
+      </ul>
+    <% elsif @post.slack_channel_id.present? %>
+      <p>まだSlackでのフィードバックはありません。</p>
+    <% else %>
+      <p>この投稿はSlackに投稿されてません。</p>
+    <% end %>
+  </div>
+
   <div class="mt-3">
     <%= link_to '投稿一覧に戻る', posts_path, class: 'btn btn-outline-secondary' %>
   </div>

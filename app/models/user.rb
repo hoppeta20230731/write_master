@@ -9,4 +9,8 @@ class User < ApplicationRecord
 
   # バリデーション
   validates :name, presence: true
+
+  # アクセストークン暗号化
+  encrypts :slack_access_token
+
 end
