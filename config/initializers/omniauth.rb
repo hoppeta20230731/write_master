@@ -4,7 +4,6 @@ Rails.application.config.middleware.use OmniAuth::Builder do
            Rails.application.credentials.dig(:slack, :client_id),
            # Client Secret (Credentialsから取得)
            Rails.application.credentials.dig(:slack, :client_secret),
-           # ↓↓↓ ここからオプション設定 (大きなハッシュ) ↓↓↓
            {
              # プロバイダー名を :slack と定義 (URLパスやコールバック処理で使うため)
              name: 'slack',
@@ -26,5 +25,5 @@ Rails.application.config.middleware.use OmniAuth::Builder do
                # 【重要】OAuth V2 のトークンエンドポイントURL
                token_url: 'https://slack.com/api/oauth.v2.access'
              }
-           } # ← オプション設定ハッシュここまで
+           }
 end
