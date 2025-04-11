@@ -2,12 +2,37 @@ class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
   before_action :set_post, only: [:show, :edit, :update, :destroy, :generate_ai_feedback]
   
-  def index
-    if user_signed_in?
-      @posts = current_user.posts.order(created_at: :desc)
+def index
+  if user_signed_in?
+    base_scope = current_user.posts # 基本となるスコープ
+    @calendar_events = base_scope.order(created_at: :asc)
+    # ★★★ ここから日付フィルタリングロジック ★★★
+    if params[:start_date]
+      begin
+        # パラメータから日付オブジェクトを生成
+        @selected_date = Date.parse(params[:start_date])
+        # created_at が selected_date の範囲内にある投稿を検索
+        # .all_day はその日の 00:00:00 から 23:59:59 までの Range を返す
+        @posts = base_scope.where(created_at: @selected_date.all_day).order(created_at: :desc)
+        # ビューで使うタイトルを設定
+        @index_title = "#{@selected_date.strftime('%Y年%m月%d日')}の投稿"
+      rescue ArgumentError
+        # 不正な日付パラメータの場合は通常の全件表示に戻す
+        @posts = base_scope.order(created_at: :desc)
+        @index_title = "投稿一覧"
+        # エラーメッセージをフラッシュで表示
+        flash.now[:alert] = "無効な日付形式です。"
+      end
+    else
+      # 日付指定がない場合は通常の全件表示
+      @posts = base_scope.order(created_at: :desc)
+      @index_title = "投稿一覧"
     end
-    # ログインしていない場合は@postsは設定せず、ビューでウェルカムページを表示
+    # ★★★ ここまで日付フィルタリングロジック ★★★
   end
+  # ログインしていない場合は @posts は nil のままなので、
+  # ビュー側で @posts.present? や user_signed_in? を使って表示を分岐する想定
+end
   
   def new
     @post = Post.new
