@@ -32,7 +32,36 @@
     </div>
   </div>
   
-    <div class="slack-replies mt-4">
+  <%# ★★★ ここから追加: AIフィードバック関連 ★★★ %>
+  <div class="ai-feedback-area mt-4">
+    <hr>
+    <h2><i class="fas fa-robot"></i> AIによるフィードバック</h2>
+
+    <%# ★★★ ここからボタン表示の条件分岐を追加 ★★★ %>
+    <% if @post.posted_at.blank? || @post.ai_feedback.blank? %>
+      <%# 条件: 下書きである、または、AIフィードバックがまだ無い %>
+      <div class="mb-3">
+        <%= button_to 'AIフィードバックを生成/更新', generate_ai_feedback_post_path(@post), method: :post, class: 'btn btn-primary' %>
+        <small class="text-muted d-block">（クリックするとClaude APIに接続し、フィードバックを生成します。同期処理のため少し時間がかかる場合があります。）</small>
+      </div>
+    <% else %>
+      <%# 条件: 投稿済みで、かつ、AIフィードバックが既にある場合 %>
+      <p><small class="text-muted">投稿済みの記事のAIフィードバックは生成済みです。</small></p>
+    <% end %>
+    <%# ★★★ ここまでボタン表示の条件分岐 ★★★ %>
+
+    <%# --- フィードバック表示 --- %>
+    <% if @post.ai_feedback.present? %>
+      <div class="ai-feedback-content" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 1rem; border-radius: 0.25rem;">
+        <%= simple_format(@post.ai_feedback) %>
+      </div>
+    <% else %>
+      <p>まだAIによるフィードバックはありません。</p>
+    <% end %>
+  </div>
+  <%# ★★★ ここまで追加 ★★★ %>
+
+  <div class="slack-replies mt-4">
     <hr>
     <h2><i class="fab fa-slack"></i> Slackでのフィードバック</h2>
 
