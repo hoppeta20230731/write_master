@@ -85,3 +85,6 @@ gem 'omniauth'
 gem 'omniauth-oauth2'
 gem 'slack-ruby-client'
 # ============================
+ 
+# Claude SDK 
+gem "anthropic-sdk-beta", "~> 0.1.0.pre.beta.5"

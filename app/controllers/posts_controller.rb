@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
-  before_action :set_post, only: [:show, :edit, :update, :destroy]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :generate_ai_feedback]
   
   def index
     if user_signed_in?
@@ -66,6 +66,28 @@ class PostsController < ApplicationController
 
     @post.destroy
     redirect_to posts_path, notice: '投稿が削除されました'
+  end
+
+  def generate_ai_feedback
+      # --- 投稿済み かつ 既にフィードバックがある場合は実行しない ---
+      if @post.posted_at.present? && @post.ai_feedback.present?
+        redirect_to post_path(@post), alert: "投稿済みの記事のAIフィードバックは一度だけ生成できます。"
+        return
+      end
+      # -------------------------------------------------------
+    begin
+      # FeedbackService を同期的に呼び出す
+      FeedbackService.new(@post).generate_feedback
+      # 成功したら notice を設定
+      redirect_to post_path(@post), notice: "AIフィードバックを生成しました。"
+    rescue FeedbackService::ClaudeApiError => e
+      Rails.logger.error "Claude feedback generation failed for Post ID: #{@post.id}: #{e.message}"
+      # 失敗したら alert を設定 (エラーメッセージを少し追加)
+      redirect_to post_path(@post), alert: "AIフィードバックの生成中にエラーが発生しました: #{e.message}"
+    rescue StandardError => e
+      Rails.logger.error "Unexpected error calling FeedbackService for post #{@post.id}: #{e.message}"
+      redirect_to post_path(@post), alert: "AIフィードバック生成中に予期せぬエラーが発生しました。"
+    end
   end
 
   private
