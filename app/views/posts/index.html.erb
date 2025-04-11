@@ -1,6 +1,11 @@
 <div class="container mt-4">
   <% if user_signed_in? %>
-    <h1>あなたの投稿一覧</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1><%= @index_title || "あなたの投稿一覧" %></h1>
+      <div>
+        <%= link_to "新規投稿", new_post_path, class: "btn btn-primary" %>
+      </div>
+    </div>
 
     <div class="alert alert-info my-3">
       <% if current_user.slack_access_token.blank? %>
@@ -11,11 +16,26 @@
         <%# TODO: 将来的に連携解除ボタンなどをここに追加できます %>
       <% end %>
     </div>
-    
-    <div class="mb-3">
-      <%= link_to "新規投稿", new_post_path, class: "btn btn-primary" %>
+
+    <%# ★★★ ここにカレンダーを移動 ★★★ %>
+    <div class="calendar-container mb-4">
+      <hr> <%# 区切り線 %>
+      <h2><i class="far fa-calendar-alt"></i> 投稿カレンダー</h2>
+      <%= month_calendar(attribute: :created_at, events: @calendar_events) do |date, posts_on_day| %>
+        <%= date.day %>
+        <% if posts_on_day.any? %>
+          <div class="mt-1">
+            <%= link_to "#{posts_on_day.count}件",
+                        posts_path(start_date: date), # 同じ index アクションにリンク
+                        class: 'badge rounded-pill bg-primary text-decoration-none' %>
+          </div>
+        <% end %>
+      <% end %>
+      <hr> <%# 区切り線 %>
     </div>
-    
+    <%# ★★★ カレンダーここまで ★★★ %>
+
+    <h2><%= @index_title || "投稿リスト" %></h2>
     <% if @posts.present? %>
       <div class="row">
         <% @posts.each do |post| %>
@@ -40,9 +60,19 @@
       </div>
     <% else %>
       <div class="alert alert-info">
-        投稿がありません。「新規投稿」から初めての投稿を作成しましょう！
+        <% if @selected_date %>
+          <%= @selected_date.strftime('%Y年%m月%d日') %>には投稿がありません。
+        <% else %>
+          投稿がありません。「新規投稿」から初めての投稿を作成しましょう！
+        <% end %>
       </div>
     <% end %>
+    <% if @selected_date %>
+      <div class="mt-4">
+        <%= link_to '投稿一覧に戻る', posts_path, class: 'btn btn-secondary' %>
+      </div>
+    <% end %>
+
   <% else %>
     <div class="jumbotron">
       <h1 class="display-4">WriteMasterへようこそ</h1>

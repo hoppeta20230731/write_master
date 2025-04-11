@@ -88,3 +88,6 @@ gem 'slack-ruby-client'
  
 # Claude SDK 
 gem "anthropic-sdk-beta", "~> 0.1.0.pre.beta.5"
+
+# カレンダー
+gem 'simple_calendar', '~> 3.1'
