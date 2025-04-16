@@ -65,6 +65,11 @@
       </div>
     <% else %>
       <p>まだAIによるフィードバックはありません。</p>
+      <% unless @post.has_attribute?(:ai_feedback_status) && ['queued', 'processing'].include?(@post.ai_feedback_status) %>
+        <div class="mb-3">
+          <%= button_to 'AIフィードバックを生成', generate_ai_feedback_post_path(@post), method: :post, class: 'btn btn-primary' %>
+        </div>
+      <% end %>
     <% end %>
   </div>
 
