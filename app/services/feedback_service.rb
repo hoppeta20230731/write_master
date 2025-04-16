@@ -33,7 +33,8 @@ class FeedbackService
         messages: [
           { role: "user", content: user_message_content }
         ],
-        max_tokens: 1024
+        max_tokens: 1024,
+        temperature: 0.3
       )
 
       feedback_text = response.content&.first&.text
