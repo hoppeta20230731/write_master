@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
-  before_action :set_post, only: [:show, :edit, :update, :destroy, :generate_ai_feedback]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :generate_ai_feedback, :feedback_status]
   
 def index
   if user_signed_in?
@@ -106,8 +106,18 @@ end
   rescue => e
     Rails.logger.error "Error queuing AI feedback generation: #{e.message}"
     redirect_to post_path(@post), alert: "AIフィードバック生成の開始に失敗しました。"
-    
   end
+
+def feedback_status
+  if @post.user != current_user
+    return render json: { error: "権限がありません" }, status: :forbidden
+  end
+  
+  render json: { 
+    status: @post.ai_feedback_status || 'none',
+    has_feedback: @post.ai_feedback.present?
+  }
+end
 
   private
 
