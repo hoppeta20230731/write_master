@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
-  before_action :set_post, only: [:show, :edit, :update, :destroy, :generate_ai_feedback]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :generate_ai_feedback, :feedback_status]
   
 def index
   if user_signed_in?
@@ -94,26 +94,30 @@ end
   end
 
   def generate_ai_feedback
-      # --- 投稿済み かつ 既にフィードバックがある場合は実行しない ---
-      if @post.posted_at.present? && @post.ai_feedback.present?
-        redirect_to post_path(@post), alert: "投稿済みの記事のAIフィードバックは一度だけ生成できます。"
-        return
-      end
-      # -------------------------------------------------------
-    begin
-      # FeedbackService を同期的に呼び出す
-      FeedbackService.new(@post).generate_feedback
-      # 成功したら notice を設定
-      redirect_to post_path(@post), notice: "AIフィードバックを生成しました。"
-    rescue FeedbackService::ClaudeApiError => e
-      Rails.logger.error "Claude feedback generation failed for Post ID: #{@post.id}: #{e.message}"
-      # 失敗したら alert を設定 (エラーメッセージを少し追加)
-      redirect_to post_path(@post), alert: "AIフィードバックの生成中にエラーが発生しました: #{e.message}"
-    rescue StandardError => e
-      Rails.logger.error "Unexpected error calling FeedbackService for post #{@post.id}: #{e.message}"
-      redirect_to post_path(@post), alert: "AIフィードバック生成中に予期せぬエラーが発生しました。"
+    # --- 投稿済み かつ 既にフィードバックがある場合は実行しない ---
+    if @post.posted_at.present? && @post.ai_feedback.present?
+      redirect_to post_path(@post), alert: "投稿済みの記事のAIフィードバックは一度だけ生成できます。"
+      return
     end
+      
+    @post.update(ai_feedback_status: 'queued') if @post.has_attribute?(:ai_feedback_status)
+    GenerateAiFeedbackJob.perform_later(@post.id)
+    redirect_to post_path(@post), notice: "AIフィードバックを生成中です。しばらくお待ちください。"
+  rescue => e
+    Rails.logger.error "Error queuing AI feedback generation: #{e.message}"
+    redirect_to post_path(@post), alert: "AIフィードバック生成の開始に失敗しました。"
   end
+
+def feedback_status
+  if @post.user != current_user
+    return render json: { error: "権限がありません" }, status: :forbidden
+  end
+  
+  render json: { 
+    status: @post.ai_feedback_status || 'none',
+    has_feedback: @post.ai_feedback.present?
+  }
+end
 
   private
 

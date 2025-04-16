@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :posts do
     member do
       post :generate_ai_feedback
+      get :feedback_status
     end
   end
 
