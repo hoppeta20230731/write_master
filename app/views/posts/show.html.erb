@@ -32,23 +32,31 @@
     </div>
   </div>
   
-  <%# ★★★ ここから追加: AIフィードバック関連 ★★★ %>
+  <%# ★★★ AIフィードバック関連 ★★★ %>
   <div class="ai-feedback-area mt-4">
     <hr>
     <h2><i class="fas fa-robot"></i> AIによるフィードバック</h2>
 
-    <%# ★★★ ここからボタン表示の条件分岐を追加 ★★★ %>
-    <% if @post.posted_at.blank? || @post.ai_feedback.blank? %>
-      <%# 条件: 下書きである、または、AIフィードバックがまだ無い %>
-      <div class="mb-3">
-        <%= button_to 'AIフィードバックを生成/更新', generate_ai_feedback_post_path(@post), method: :post, class: 'btn btn-primary' %>
-        <small class="text-muted d-block">（クリックするとClaude APIに接続し、フィードバックを生成します。同期処理のため少し時間がかかる場合があります。）</small>
-      </div>
-    <% else %>
-      <%# 条件: 投稿済みで、かつ、AIフィードバックが既にある場合 %>
-      <p><small class="text-muted">投稿済みの記事のAIフィードバックは生成済みです。</small></p>
+    <% if @post.has_attribute?(:ai_feedback_status) && @post.ai_feedback_status.present? %>
+      <% case @post.ai_feedback_status %>
+      <% when 'queued' %>
+        <div class="alert alert-info">
+          <i class="fas fa-spinner fa-spin"></i> AIフィードバックを生成中です。しばらくお待ちください。
+          このページを後ほど再度確認してください。
+        </div>
+      <% when 'processing' %>
+        <div class="alert alert-info">
+          <i class="fas fa-spinner fa-spin"></i> AIフィードバックを生成中です。しばらくお待ちください。
+        </div>
+      <% when 'failed' %>
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle"></i> AIフィードバックの生成中にエラーが発生しました。
+        </div>
+        <div class="mb-3">
+          <%= button_to 'AIフィードバックを再生成', generate_ai_feedback_post_path(@post), method: :post, class: 'btn btn-primary' %>
+        </div>
+      <% end %>
     <% end %>
-    <%# ★★★ ここまでボタン表示の条件分岐 ★★★ %>
 
     <%# --- フィードバック表示 --- %>
     <% if @post.ai_feedback.present? %>
@@ -59,7 +67,6 @@
       <p>まだAIによるフィードバックはありません。</p>
     <% end %>
   </div>
-  <%# ★★★ ここまで追加 ★★★ %>
 
   <div class="slack-replies mt-4">
     <hr>
