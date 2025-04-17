@@ -23,7 +23,7 @@ class Post < ApplicationRecord
     # スコアに基づいた評価ラベルを返すメソッド
     def score_label
       case ai_score
-      when 0..50 then "改善が必要"
+      when 0..50 then "がんばろう"
       when 51..70 then "良い"
       when 71..85 then "とても良い"
       when 86..100 then "優秀"
