@@ -108,16 +108,42 @@ end
     redirect_to post_path(@post), alert: "AIフィードバック生成の開始に失敗しました。"
   end
 
-def feedback_status
-  if @post.user != current_user
-    return render json: { error: "権限がありません" }, status: :forbidden
+  def feedback_status
+    if @post.user != current_user
+      return render json: { error: "権限がありません" }, status: :forbidden
+    end
+    
+    render json: { 
+      status: @post.ai_feedback_status || 'none',
+      has_feedback: @post.ai_feedback.present?
+    }
   end
-  
-  render json: { 
-    status: @post.ai_feedback_status || 'none',
-    has_feedback: @post.ai_feedback.present?
-  }
-end
+
+  def dashboard
+    @posts = current_user.posts.where.not(ai_score: nil)
+    
+    # 日別のスコア推移（Groupdateを使わないバージョン）
+    posts_by_date = @posts.select("DATE(created_at) as date, AVG(ai_score) as avg_score")
+                          .group("DATE(created_at)")
+                          .order("date")
+    
+    @daily_scores = posts_by_date.each_with_object({}) do |record, hash|
+      hash[record.date.to_s] = record.avg_score.to_f
+    end
+    
+    # 評価基準別のスコア分布
+    @score_distribution = {
+      "改善が必要 (0-50点)" => @posts.where(ai_score: 0..50).count,
+      "良い (51-70点)" => @posts.where(ai_score: 51..70).count, 
+      "とても良い (71-85点)" => @posts.where(ai_score: 71..85).count,
+      "優秀 (86-100点)" => @posts.where(ai_score: 86..100).count
+    }
+    
+    # 最高/平均/最低スコア
+    @max_score = @posts.maximum(:ai_score)
+    @avg_score = @posts.average(:ai_score)&.round(1)
+    @min_score = @posts.minimum(:ai_score)
+  end
 
   private
 

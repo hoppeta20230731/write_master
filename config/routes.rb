@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   get 'calendar/show'
   devise_for :users
   resources :posts do
+    collection do
+      get :dashboard
+    end
+    
     member do
       post :generate_ai_feedback
       get :feedback_status

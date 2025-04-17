@@ -1,0 +1,77 @@
+<div class="container mt-4">
+  <h1>ライティング分析ダッシュボード</h1>
+  
+  <% if @posts.any? %>
+    <!-- スコアサマリーカード -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-header bg-primary text-white">
+            最高スコア
+          </div>
+          <div class="card-body">
+            <h2 class="display-4"><%= @max_score || 0 %></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-header bg-info text-white">
+            平均スコア
+          </div>
+          <div class="card-body">
+            <h2 class="display-4"><%= @avg_score || 0 %></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-header bg-secondary text-white">
+            最低スコア
+          </div>
+          <div class="card-body">
+            <h2 class="display-4"><%= @min_score || 0 %></h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- スコア推移グラフ -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="h5 mb-0">AIスコア推移</h2>
+      </div>
+      <div class="card-body">
+        <%= line_chart @daily_scores, 
+            min: 0, 
+            max: 100, 
+            points: true, 
+            colors: ["#3366CC"], 
+            legend: false, 
+            round: 0, 
+            suffix: "点" %>
+      </div>
+    </div>
+    
+    <!-- スコア分布グラフ -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="h5 mb-0">スコア分布</h2>
+      </div>
+      <div class="card-body">
+        <%= pie_chart @score_distribution, 
+            donut: true,
+            colors: ["#dc3545", "#ffc107", "#17a2b8", "#28a745"],
+            legend: true %>
+      </div>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      AIフィードバックを持つ投稿がありません。投稿のAIフィードバックを生成すると、ここにデータが表示されます。
+    </div>
+  <% end %>
+  
+  <div class="mt-3">
+    <%= link_to '投稿一覧に戻る', posts_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>

@@ -86,11 +86,12 @@ gem 'omniauth-oauth2'
 gem 'slack-ruby-client'
 # ============================
  
-# 共通LLM統合ライブラリ
+# Claude_SDK
 gem "anthropic-sdk-beta", "~> 0.1.0.pre.beta.6"
 
-# カレンダー
-gem 'simple_calendar', '~> 3.1'
+# 視覚化
+gem 'simple_calendar', '~> 3.1'   # カレンダー
+gem 'chartkick'                   # グラフ描画ライブラリ
 
 # Active Jobのバックエンド
 gem 'sidekiq', '~> 7.0'
