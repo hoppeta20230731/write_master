@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_04_16_065213) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_17_054141) do
   create_table "posts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title"
     t.text "content"
@@ -25,6 +25,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_16_065213) do
     t.text "slack_replies_data"
     t.text "ai_feedback"
     t.string "ai_feedback_status"
+    t.integer "ai_score"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
