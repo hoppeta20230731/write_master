@@ -82,7 +82,7 @@ GEM
       tzinfo (~> 2.0)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
-    anthropic-sdk-beta (0.1.0.pre.beta.5)
+    anthropic-sdk-beta (0.1.0.pre.beta.6)
       connection_pool
     base64 (0.2.0)
     bcrypt (3.1.20)
@@ -364,7 +364,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_hash
-  anthropic-sdk-beta (~> 0.1.0.pre.beta.5)
+  anthropic-sdk-beta (~> 0.1.0.pre.beta.6)
   bootsnap
   capybara
   debug
