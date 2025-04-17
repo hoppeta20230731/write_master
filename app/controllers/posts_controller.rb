@@ -120,29 +120,13 @@ end
   end
 
   def dashboard
-    @posts = current_user.posts.where.not(ai_score: nil)
-    
-    # 日別のスコア推移（Groupdateを使わないバージョン）
-    posts_by_date = @posts.select("DATE(created_at) as date, AVG(ai_score) as avg_score")
-                          .group("DATE(created_at)")
-                          .order("date")
-    
-    @daily_scores = posts_by_date.each_with_object({}) do |record, hash|
-      hash[record.date.to_s] = record.avg_score.to_f
-    end
-    
-    # 評価基準別のスコア分布
-    @score_distribution = {
-      "改善が必要 (0-50点)" => @posts.where(ai_score: 0..50).count,
-      "良い (51-70点)" => @posts.where(ai_score: 51..70).count, 
-      "とても良い (71-85点)" => @posts.where(ai_score: 71..85).count,
-      "優秀 (86-100点)" => @posts.where(ai_score: 86..100).count
-    }
-    
-    # 最高/平均/最低スコア
-    @max_score = @posts.maximum(:ai_score)
-    @avg_score = @posts.average(:ai_score)&.round(1)
-    @min_score = @posts.minimum(:ai_score)
+    # Userモデルで定義したメソッドを呼び出してインスタンス変数に格納
+    @stats = current_user.score_stats                # 最高/平均/最低スコアのハッシュ
+    @score_distribution = current_user.score_distribution_data # スコア分布のハッシュ
+    @post_scores = current_user.post_score_trend_data      # 投稿別スコア推移の配列 (デフォルト50件)
+  
+    # 必要に応じて件数を指定（オプション）
+    # @post_scores = current_user.post_score_trend_data(limit: 100)
   end
 
   private
