@@ -1,6 +1,39 @@
 require 'slack-ruby-client'
 
 class SlackService
+  # チャンネル一覧を取得するクラスメソッド
+  def self.fetch_channels(user)
+    return [] unless user&.slack_access_token.present?
+    
+    begin
+      token = user.slack_access_token
+      client = Slack::Web::Client.new(token: token)
+      
+      # 公開チャンネルのみ取得するように設定
+      response = client.conversations_list(
+        types: "public_channel",  # 公開チャンネルのみ
+        exclude_archived: true
+      )
+      
+      if response.ok?
+        # チャンネル情報をドロップダウン用にフォーマット
+        channels = response.channels.map do |channel|
+          ["##{channel.name}", channel.id]
+        end
+        
+        # 名前でソート
+        channels.sort_by { |c| c[0].downcase }
+      else
+        Rails.logger.error "Slack conversations.list APIエラー: #{response.error}"
+        []
+      end
+    rescue => e
+      Rails.logger.error "Slack API例外 (チャンネル取得): #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      []
+    end
+  end
+
   # postオブジェクトと、投稿したuserオブジェクトを受け取る
   def self.post_message(post, user)
     # --- アクセストークン取得 ---
@@ -11,17 +44,14 @@ class SlackService
     end
 
     # --- 投稿先チャンネルID設定 ---
-    channel_id = Rails.application.credentials.dig(:slack, :post_channel_id)
+    # 投稿オブジェクトのチャンネルIDを優先的に使用し、なければデフォルト値
+    channel_id = post.slack_channel_id.presence || 
+                Rails.application.credentials.dig(:slack, :post_channel_id)
 
     unless channel_id.present?
-      Rails.logger.error "Slack投稿エラー: 投稿先のチャンネルID (SLACK_POST_CHANNEL_ID) が設定されていません。"
-      # デフォルトチャンネルを設定しない場合は false を返す
+      Rails.logger.error "Slack投稿エラー: 投稿先のチャンネルIDが設定されていません。"
       return false
-      # # デフォルトとして #general を使う場合 (チャンネルIDを調べて書き換えてください)
-      # channel_id = '#general'
-      # Rails.logger.warn "SLACK_POST_CHANNEL_ID が未設定のため、'#{channel_id}' に投稿を試みます。"
     end
-    # --- ここまで設定 ---
 
     # Slack API クライアント初期化
     client = Slack::Web::Client.new(token: token)
