@@ -1,7 +1,6 @@
 require 'slack-ruby-client'
 
 class SlackService
-  # チャンネル一覧を取得するクラスメソッド
   def self.fetch_channels(user)
     return [] unless user&.slack_access_token.present?
     
@@ -9,17 +8,25 @@ class SlackService
       token = user.slack_access_token
       client = Slack::Web::Client.new(token: token)
       
-      # 公開チャンネルのみ取得するように設定
+      # トークンの検証
+      auth_test = client.auth_test
+      unless auth_test.ok?
+        Rails.logger.error "Slack認証エラー: #{auth_test.error}"
+        return []
+      end
+      
+      # パブリックチャンネルの取得
       response = client.conversations_list(
-        types: "public_channel",  # 公開チャンネルのみ
-        exclude_archived: true
+        types: "public_channel",
+        exclude_archived: true,
+        limit: 1000
       )
       
       if response.ok?
-        # チャンネル情報をドロップダウン用にフォーマット
-        channels = response.channels.map do |channel|
-          ["##{channel.name}", channel.id]
-        end
+        # Botがメンバーのチャンネルのみをフィルタリング
+        channels = response.channels
+          .select { |channel| channel.is_member == true }
+          .map { |channel| ["##{channel.name}", channel.id] }
         
         # 名前でソート
         channels.sort_by { |c| c[0].downcase }
