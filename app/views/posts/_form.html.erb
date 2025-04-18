@@ -31,6 +31,24 @@
     <%= form.label :draft_flag, '下書きとして保存（チェックを外すとSlackに投稿されます）', class: 'form-check-label' %>
   </div>
 
+  <% if !post.persisted? || post.draft_flag? %>
+    <div class="form-group mb-3">
+      <%= form.label :slack_channel_id, 'Slack投稿先' %>
+      <% if @slack_channels.present? %>
+        <%= form.select :slack_channel_id, 
+                      @slack_channels,
+                      { include_blank: '投稿先チャンネルを選択' }, 
+                      { class: 'form-select' } %>
+        <small class="form-text text-muted">投稿先のSlackチャンネルを選択してください</small>
+      <% else %>
+        <div class="alert alert-warning">
+          <p>Slackチャンネルの取得に失敗しました。Slack連携が正しく設定されているか確認してください。</p>
+          <%= link_to "Slackと連携する", slack_login_path, method: :post, class: "btn btn-warning btn-sm", data: { turbo: false } %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="actions">
     <%= form.submit '保存する', class: 'btn btn-primary' %>
   </div>

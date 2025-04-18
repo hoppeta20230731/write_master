@@ -36,6 +36,7 @@ end
   
   def new
     @post = Post.new
+    @slack_channels = SlackService.fetch_channels(current_user) # チャンネル一覧を取得
   end
   
   def create
@@ -60,7 +61,9 @@ end
   def edit
     if @post.posted_at.present?
       redirect_to @post, alert: '投稿済みの内容は編集できません'
+      return
     end
+    @slack_channels = SlackService.fetch_channels(current_user) # チャンネル一覧を取得
   end
   
   def update
@@ -141,7 +144,7 @@ end
   end
   
   def post_params
-    params.require(:post).permit(:title, :content, :draft_flag)
+    params.require(:post).permit(:title, :content, :draft_flag, :slack_channel_id)
   end
   
   def count_words(text)
