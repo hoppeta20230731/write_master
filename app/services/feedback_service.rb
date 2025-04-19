@@ -71,7 +71,7 @@ class FeedbackService
 
     begin
       response = client.messages.create(
-        model: "claude-3-5-haiku-20241022",
+        model: "claude-3-5-sonnet-20241022",
         system: system_prompt,
         messages: [
           { role: "user", content: user_message_content }
