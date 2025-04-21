@@ -10,8 +10,8 @@ WriteMasterは、ビジネスライティングのスキル向上を効率的に
 https://write-master.onrender.com
 
 ## テスト用アカウント
-- メールアドレス: test@example.com
-- パスワード: password123
+- メールアドレス:
+- パスワード:
 
 ## 利用方法
 1. ユーザー登録・ログインを行う
