@@ -1,31 +1,162 @@
-# write_masterのER図
+# WriteMaster
 
-## usersテーブル
+## アプリケーション概要
+WriteMasterは、ビジネスライティングのスキル向上を効率的にサポートするためのWebアプリケーションです。
+字数カウント機能、30分タイマー機能、Slack連携機能を備え、ユーザーがライティングに集中できる環境を提供します。
+また、Anthropic Claude APIを活用したAIフィードバック機能により、文章の質を100点満点でスコアリングし、具体的な改善点を提案します。
+過去の投稿を簡単に振り返り、AIスコアの推移を可視化することで、ライティングスキルの成長を実感できます。
 
-| Column              | Type       | Options                        |
-| ------------------- | ---------- | ------------------------------ |
-| name                | string     | null: false                    |
-| email               | string     | null: false, unique: true      |
-| encrypted_password  | string     | null: false                    |
-| slack_access_token  | string     |                                |
+## URL
+https://write-master.onrender.com
 
-### Association
+## テスト用アカウント
+- メールアドレス: test@example.com
+- パスワード: password123
+
+## 利用方法
+1. ユーザー登録・ログインを行う
+2. 「新規投稿」ボタンをクリックして投稿作成画面に移動
+3. タイマーを開始し、制限時間内（30分）に文章を作成
+4. リアルタイムで表示される字数カウンターを確認しながら、400〜700字の範囲で文章を調整
+5. 投稿を下書き保存するか、Slackに直接投稿
+6. 投稿一覧画面やカレンダー表示で過去の投稿を振り返り
+7. AIフィードバック機能を利用して文章の質を評価
+8. 分析ダッシュボードで成長の推移を確認
+
+## アプリケーションを作成した背景
+ビジネスライティングのスキル向上には継続的な練習とフィードバックに基づく振り返りが最も重要です。
+コミュニケーションツールを活用して文章を共有し、他者からフィードバックをもらうことは効果的な学習方法です。
+Slackのようなプラットフォームは双方向性の高さや使いやすさから広く普及していますが、ライティングトレーニングの観点では以下のような課題がありました：
+
+1. **ライティング関連機能の不足**：字数確認のために外部サイトを使ったり、時間管理のために別途タイマーを設定したりと、複数のツールを行き来する必要があり、ライティングへの集中が妨げられる
+2. **過去投稿の振り返りが困難**：Slackは日常的なコミュニケーション向けの設計であり、自分の過去投稿を時系列で振り返り、成長を確認するための機能が十分でない
+3. **フィードバックの管理が煩雑**：投稿に対するフィードバックがスレッド内に散在し、後から特定の投稿に対する全てのフィードバックを一覧で確認することが手間になる
+4. **客観的な評価指標の欠如**：定性的なフィードバックは得られても、文章力の成長を数値などで客観的に把握する手段がない
+
+WriteMasterは、これらの課題を解決する補完的なプラットフォームとして開発しました。
+ユーザーは引き続きSlackでコミュニケーションを取りながら、WriteMasterで集中的な文章作成と振り返り、成長の可視化を行うことができます。両プラットフォームの連携により、ビジネスライティングスキルの向上をより効率的に進めることが可能になります。
+
+## 実装した機能
+### 1. ユーザー認証機能
+- Deviseを使用したユーザー登録・ログイン機能
+- ユーザープロフィール編集機能
+### 2. 投稿作成機能
+- リアルタイム字数カウント機能（400〜700字の範囲を視覚的に表示）
+- 30分タイマー機能
+- 下書き保存機能
+### 3. Slack連携機能
+- OAuth認証によるSlackアカウント連携
+- 投稿をSlackチャンネルに送信する機能
+- Slackでの返信を取得・表示する機能
+### 4. 投稿管理機能
+- 投稿一覧表示
+- 投稿詳細表示
+- 投稿編集・削除機能
+- カレンダーによる投稿履歴表示
+### 5. AI文章フィードバック機能
+- Anthropic Claude APIを使用した文章評価
+- 文章の質を100点満点でスコアリング
+- 具体的な改善点の提案
+### 6. 分析ダッシュボード機能
+- 文章スコアの推移グラフ
+- 平均・最高・最低スコアの表示
+- スコア分布の可視化
+
+## 実装予定の機能
+1. **AI分析機能の強化**
+   - プロンプトの改善
+   - 字数・時間要素の評価
+   - パーソナライズ
+2. **ゲーミフィケーション要素**
+   - 達成バッジシステム
+3. **基本機能改善**
+   - タイマー機能の拡張
+4. **モバイル対応の強化**
+   - スマートフォンでの使いやすさ向上
+   - レスポンシブデザインの最適化
+
+## データベース設計
+### usersテーブル
+| Column               | Type       | Options                        |
+| -------------------- | ---------- | ------------------------------ |
+| name                 | string     | null: false                    |
+| email                | string     | null: false, unique: true      |
+| encrypted_password   | string     | null: false                    |
+| slack_access_token   | string     |                                |
+
+#### Association
 - has_many :posts
 
-## postsテーブル
+### postsテーブル
+| Column               | Type       | Options                        |
+| -------------------- | ---------- | ------------------------------ |
+| title                | string     | null: false                    |
+| content              | text       | null: false                    |
+| word_count           | integer    | null: true                     |
+| draft_flag           | boolean    |                                |
+| posted_at            | datetime   |                                |
+| slack_channel_id     | string     |                                |
+| slack_message_ts     | string     |                                |
+| slack_replies_data   | text       |                                |
+| ai_feedback          | text       |                                |
+| ai_feedback_status   | string     |                                |
+| ai_score             | integer    |                                |
+| user                 | references | null: false, foreign_key: true |
 
-| Column              | Type       | Options                        |
-| ------------------- | ---------- | ------------------------------ |
-| title               | string     | null: false                    |
-| content             | text       | null: false                    |
-| word_count          | integer    | null: true                     |
-| draft_flag          | boolean    |                                |
-| posted_at           | datetime   |                                |
-| slack_channel_id    | string     |                                |
-| slack_message_ts    | string     |                                |
-| slack_replies_data  | text       |                                |
-| ai_feedback         | text       |                                |
-| user                | references | null: false, foreign_key: true |
-
-### Association
+#### Association
 - belongs_to :user
+
+## 画面遷移図
+※ 画像を添付予定
+
+## 開発環境
+- Ruby 3.2.0
+- Ruby on Rails 7.1.0
+- MySQL（開発・テスト環境）
+- PostgreSQL（本番環境）
+- JavaScript
+- Bootstrap 5
+- Devise（認証）
+- Slack OAuth & API
+- Anthropic Claude API
+- RSpec（テスト）
+- Git/GitHub（バージョン管理）
+
+## ローカルでの動作方法
+```
+# リポジトリのクローン
+$ git clone https://github.com/hoppeta20230731/write_master
+$ cd write_master
+
+# 依存関係のインストール
+$ bundle install
+
+# データベースの作成・マイグレーション
+$ rails db:create
+$ rails db:migrate
+
+# 環境変数の設定
+# SLACK_CLIENT_ID=your_slack_client_id
+# SLACK_CLIENT_SECRET=your_slack_client_secret
+# ANTHROPIC_API_KEY=your_anthropic_api_key
+```
+
+## 工夫したポイント
+1. **ユーザー体験の最適化**
+   - ライティングに集中できるシンプルなUI設計
+   - タイマーと字数カウントの視覚的フィードバック
+2. **Slack APIとの統合**
+   - OAuthによるスムーズな認証フロー
+   - Slack Web APIによる投稿機能
+   - 返信データの同期と表示
+3. **AI文章フィードバック**
+   - Claude APIを活用した質の高い文章評価
+   - JSONフォーマットでの構造化された返答処理
+   - 非同期処理によるユーザー待ち時間の軽減
+4. **データ可視化**
+   - Chart.jsを活用した直感的なグラフ表示
+   - 成長の可視化によるモチベーション維持
+   - カレンダーによる投稿習慣の確認
+
+## 制作時間
+企画立案から実装まで約4週間
