@@ -106,7 +106,7 @@ WriteMasterは、これらの課題を解決する補完的なプラットフォ
 - belongs_to :user
 
 ## 画面遷移図
-※ 画像を添付予定
+![画面遷移図](images/screen_transition.png)
 
 ## 開発環境
 - Ruby 3.2.0
